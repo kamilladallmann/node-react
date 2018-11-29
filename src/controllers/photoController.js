@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     destination: function(req, file, cb){
         cb(null, 'uploads/');
     },
-    filename: function(req, file, cb){
+    filename: function(req, file, cb){ 
         cb(null, file.originalname);
     }
 });
@@ -38,9 +38,15 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
     try{
-        const photos = await Photo.find().populate('user');
-
-        return res.send({photos});
+        Photo.find({}, function(err, data){
+            if(err)
+                console.log(err);
+            res.render('list', {data: data});
+        });
+        
+        //const photos = await Photo.find().populate('user');
+        
+        //return res.send({photos});
     }catch(err){
         return res.status(400).send({error: 'Error loading photos'});
     }
@@ -56,40 +62,67 @@ router.get('/', async (req, res) => {
     }
 });  */
 
-router.post('/', upload.single('image'), async(req, res) => {
-    console.log(req.file);
+router.post('/', upload.any(), async(req, res) => {
+    
     try{
-        const photo = await new Photo({
+
+        if (!req.body && !req.files) {
+            res.json({ success: false });
+          } else {
+            var c;
+            Photo.findOne({}, function (err, data) {
+              console.log("into photo");
+        
+              if (data) {
+                console.log("if");
+                c = data.unique_id + 1;
+              } else {
+                c = 1;
+              }
+        
+              var photo = new Photo({
+                unique_id: c,
+                name: req.body.title,
+                imagem: req.files[0].path,
+              });
+        
+              photo.save(function (err, Person) {
+                if (err)
+                  console.log(err);
+                else
+                  res.redirect('/photos');        
+              });
+        
+            }).sort({ _id: -1 }).limit(1);
+        }
+    }
+
+        /*const photo = await new Photo({
             user: req.userId,
             title: req.body.title,
             description: req.body.description,
-            fileImage: req.file.path
+            imagem: req.files[0].filename
         });
         photo.save();
-        
-        return res.send({photo});
-
-    }catch(err){
+        console.log(photo);
+        return res.send({photo}); */
+        catch(err){
         return res.status(400).send({error: 'Error creating new photo'});
     }
 });
 
-router.get('/:photoTitle', async(req, res) => {
+router.get('/buscar', function(req, res) {
     try{
-        const photo = await Photo.find({title: req.params.photoTitle}).populate('user');
-        return res.send({photo});
+        Photo.find({name: req.query.nome}, function (err, data){
+            if(err)
+                console.log(err);
+            console.log(data);
+            res.render('list', {data: data});
+        });
+        /* const photo = await Photo.find({title: req.params.photoTitle}).populate('user');
+        return res.send({photo}); */
     }catch(err){
         return res.status(400).send({error: 'Error finding photo'})
-    }
-})
-
-router.delete('/:photoTitle', async(req, res) => {
-    try{
-        const photo = await Photo.findOneAndDelete({title: req.params.photoTitle});
-
-        return res.send({success: 'Photo deleted'});
-    }catch(err){
-        return res.status(400).send({error: 'Error removing photo'});
     }
 });
 
