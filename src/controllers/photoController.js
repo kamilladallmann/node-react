@@ -1,6 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
-const Photo = require('../models/Photo');
+const Photo = require('../models/photo');
 const multer = require('multer');
 const router = express.Router();
 
