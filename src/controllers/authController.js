@@ -1,4 +1,5 @@
 const express = require('express');
+const authMiddleware = require('../middleware/auth');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -13,6 +14,8 @@ function generateToken(params = {}){
     });
 }
 
+router.use(authMiddleware);
+
 router.post('/register', async(req, res) => {
     const {email} = req.body;
 
@@ -24,24 +27,16 @@ router.post('/register', async(req, res) => {
 
         user.password = undefined;
 
-        /* token = generateToken({id: user.id});
-
-    console.log(token);
-
-    req.headers.authorization = "Bearer " + token;
-
-    console.log(req.headers.authorization); */
-        /* return res.send({
+        return res.send({
             user,
             token: generateToken({id: user.id}),
-        }); */
-        res.redirect('/auth/login');
+        });
     }catch(err){
         return res.status(400).send({error: 'Registration failed'});
     }
 });
 
-router.post('/login', async(req, res, next) => {
+router.post('/authenticate', async(req, res) => {
     const {email, password} = req.body;
     
     const user = await User.findOne({email}).select('+password');
@@ -51,18 +46,13 @@ router.post('/login', async(req, res, next) => {
     
     if(!await bcrypt.compare(password, user.password))
         return res.status(400).send({error: 'Invalid password'});
-
-     var token = generateToken({id: user.id}); //jwt.sign({id: user.id}, authConfig.secret);
-
-    user.token = token;
     
-     res.status(200).send({ auth: true, token: token });
-    
-    //res.redirect('/photos');
-    /* res.send({
+    user.password = undefined;
+
+    res.send({
         user, 
         token: generateToken({id: user.id})
-    }); */   
+    });   
 });
 
 module.exports = app => app.use('/auth', router);

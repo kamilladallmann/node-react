@@ -1,9 +1,9 @@
 const express = require('express');
-//const authMiddleware = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 const Photo = require('../models/photo');
-const User = require('../models/user');
 const multer = require('multer');
 const router = express.Router();
+
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
         cb(null, 'uploads/');
@@ -34,13 +34,13 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
-router.get('/', async (req, res) => {    
+router.get('/', async (req, res) => {
     try{
-            const photos = await Photo.find();//.populate('user');
+        const photos = await Photo.find().populate('user');
 
-            return res.send({photos});   
+        return res.send({photos});
     }catch(err){
         return res.status(400).send({error: 'Error loading photos'});
     }
@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
     }
 });  */
 
-router.post('/insert', upload.single('image'), async(req, res) => {
+router.post('/', upload.single('image'), async(req, res) => {
     console.log(req.file);
     try{
         const photo = await new Photo({

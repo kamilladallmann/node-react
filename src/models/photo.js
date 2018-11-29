@@ -6,6 +6,10 @@ const PhotoSchema = new mongoose.Schema({
         type: String,
         require: true,
     },
+    description: {
+        type: String,
+        require: true,
+    },
     fileImage: {
         type: String,
         require: true
