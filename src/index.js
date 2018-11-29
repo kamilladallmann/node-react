@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({ extended: false}));
 app.use('/uploads', express.static('uploads'));
 require('./app/controllers/index')(app);
 
-//var porta = process.env.PORT || 8080;
-//app.listen(porta);
+var porta = process.env.PORT || 8080;
+app.listen(porta);
 
-app.listen(3000);
+//app.listen(3000);
