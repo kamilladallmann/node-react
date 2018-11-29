@@ -1,5 +1,4 @@
 const express = require('express');
-const authMiddleware = require('../middleware/auth');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -13,8 +12,6 @@ function generateToken(params = {}){
         expiresIn: 86400, //um dia
     });
 }
-
-router.use(authMiddleware);
 
 router.post('/register', async(req, res) => {
     const {email} = req.body;
