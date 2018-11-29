@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use('/uploads', express.static('uploads'));
-require('../../controllers/index')(app);
+require('../controllers/index')(app);
 
 var porta = process.env.PORT || 8080;
 app.listen(porta);
